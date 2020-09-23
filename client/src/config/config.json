@@ -1,0 +1,7 @@
+{
+  "credit": "Lisk Decrypt by Delegate anonimowy891",
+  "nodes": ["http://localhost:4000"],
+  "initPass":"your init passphrase",
+  "initAccount": "2883947083225746407L",
+  "consoleDefaultText": "Welcome to Lisk Decrypt!\nA Decrypt/Encrypt tool build Lisk SDK and Lisk Elements created by delegate anonimowy891.\n\nNew user:\n1: Click on create account to generate a new passphrase.\n2: Save the passphrase somewhere and click on the Login button.\n3: Click initialize to receive LSN tokens.\n4: Paste recipient adress, write message and send.\n"
+}

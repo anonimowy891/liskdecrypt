@@ -1,0 +1,54 @@
+.account {
+  margin: auto;
+  width: 65%;
+  margin-bottom: 5px;
+  margin-top: 50px;
+  text-align: center;
+}
+.accountButton {
+  cursor: pointer;
+  color: white;
+  border-radius: 12px;
+}
+.Encrypt {
+  cursor: pointer;
+  color: white;
+  border-radius: 12px;
+}
+.decrypt {
+  cursor: pointer;
+  color: white;
+  border-radius: 12px;
+}
+.accountButton:hover {
+  color: white;
+}
+.initButton {
+  cursor: pointer;
+  color: white;
+  border-radius: 12px;
+}
+.initButton:hover {
+  color: white;
+}
+.PubKey {
+  position: relative;
+  margin: 5px auto;
+  width: 100%;
+  height: 70px;
+  border: 18px solid navy;
+}
+.TransactionId {
+  position: relative;
+  margin: 5px auto;
+  width: 100%;
+  height: 70px;
+  border: 18px solid navy;
+}
+.Message {
+  position: relative;
+  margin: 5px auto;
+  width: 100%;
+  height: 150px;
+  border: 18px solid navy;
+}
