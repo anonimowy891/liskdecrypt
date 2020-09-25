@@ -55,7 +55,6 @@ const Account = ({
     networkIdentifier: networkIdentifier,
     timestamp: transactions.utils.getTimeFromBlockchainEpoch(new Date()),
   });
-  
     tx.sign(userPassphrase);
     console.log(tx);
     
@@ -106,14 +105,102 @@ const Account = ({
 
   } 
 
+  const getUserTransactions = (userAddress, type= 1050, batchSize = 100, offset= 0) => {
+    return new Promise((res, rej) => {
+  
+      const xmlhttp1 = new XMLHttpRequest();
+      xmlhttp1.open('GET', `${nodes}/api/transactions?type=${type}&limit=${batchSize}&offset=${offset}&sort=timestamp:desc`, true);
+      xmlhttp1.send();
+      xmlhttp1.onreadystatechange = function() {
+        if (this.readyState === 4 && this.status === 200) {
+          const response = JSON.parse(this.responseText);
+          res(response.data.filter(t => t.asset.recipientId === userAddress));
+          return;
+        }
+  
+        if (this.readyState ===  4) {
+          rej(this.responseText);
+        }
+      };
+    });
+  };
+  
+  const getUserLatestTransaction = async (userAddress, maxOffset = 1000) => {
+    let offset = 0;
+    let userLatestTransaction;
+  
+    do {
+      const userTransactions = await getUserTransactions(userAddress, 1050, 100, offset);
+  
+      if (userTransactions.length > 0) {
+        return userTransactions[0];
+      }
+  
+      offset += 100;
+    } while (userLatestTransaction === undefined && offset < maxOffset);
+  
+    throw new Error("No user Transaction found");
+  }
+  
+  const showLastUserTransaction = () => {
+    getUserLatestTransaction(userAddress)
+    .then(userLatestTransaction => document.getElementById("field2").value = userLatestTransaction.id, decrypt(), showSender())// Transaction has been found
+    .catch(error => document.getElementById("field2").placeholder = error.message); // Transaction is not found, maybe do something, or not
+  }
+
+
+  const getSender = (userAddress, type= 1050, batchSize = 100, offset= 0) => {
+    return new Promise((res, rej) => {
+  
+      const xmlhttp1 = new XMLHttpRequest();
+      xmlhttp1.open('GET', `${nodes}/api/transactions?type=${type}&limit=${batchSize}&offset=${offset}&sort=timestamp:desc`, true);
+      xmlhttp1.send();
+      xmlhttp1.onreadystatechange = function() {
+        if (this.readyState === 4 && this.status === 200) {
+          const response = JSON.parse(this.responseText);
+          res(response.data.filter(t => t.asset.recipientId === userAddress));
+          return;
+        }
+  
+        if (this.readyState ===  4) {
+          rej(this.responseText);
+        }
+      };
+    });
+  };
+  
+  const getLatestSender = async (userAddress, maxOffset = 1000) => {
+    let offset = 0;
+    let userLatestTransaction;
+  
+    do {
+      const userTransactions = await getSender(userAddress, 1050, 100, offset);
+  
+      if (userTransactions.length > 0) {
+        return userTransactions[0];
+      }
+  
+      offset += 100;
+    } while (userLatestTransaction === undefined && offset < maxOffset);
+  
+    throw new Error("No user found");
+  }
+  
+  const showSender = () => {
+    getLatestSender(userAddress)
+    .then(userLatestTransaction => document.getElementById("field1").value = userLatestTransaction.senderId)// Transaction has been found
+    .catch(error => document.getElementById("field1").placeholder = error.message); // Transaction is not found, maybe do something, or not
+  }
+
+
+
   const eraseText = () => {
     document.getElementById("field").value = "";
     document.getElementById("field1").value = "";
-
   }
 
   const decrypt = () => {
-
+    setTimeout(() =>{
     if (sessionStorage.getItem("secret")) {
       const userPassphrase = sessionStorage.getItem("secret");
     let txId = document.getElementById("field2").value
@@ -121,7 +208,8 @@ const Account = ({
     xmlhttp1.open("GET", nodes+"/api/transactions?id="+txId+"&limit=1&offset=0", true);
     xmlhttp1.send();
     xmlhttp1.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) {
+      if 
+      (this.readyState == 4 && this.status == 200) {
             var myObj1 = JSON.parse(this.responseText);
             var encryptedMessage = myObj1.data[0].asset.Message.encryptedMessage;
             var nonce = myObj1.data[0].asset.Message.nonce;
@@ -131,15 +219,11 @@ const Account = ({
       encryptedMessage,
       nonce,
       userPassphrase,
-      senderPubKey
-  ); 
+      senderPubKey)
+
   document.getElementById("field").value = decryptedMessage;
-  }}}}
-
-
-  const openInNewTab = (url) => {
-    const newWindow = window.open(url, '_blank', 'noopener,noreferrer')
-    if (newWindow) newWindow.opener = null
+  }}}
+},500);
 }
 
   const Encrypt = () => {
@@ -173,7 +257,7 @@ const Account = ({
       const tx =new Decrypt({
         asset: {
           recipientId: adres,
-          amount: transactions.utils.convertLSKToBeddows("1"),
+          amount: transactions.utils.convertLSKToBeddows("0"),
           Message: encryptedMessage
         },
         networkIdentifier: networkIdentifier,
@@ -226,13 +310,13 @@ const Account = ({
 
           <button onClick={Encrypt} className="Encrypt">Encrypt </button>
           <button onClick={decrypt} className="decrypt">Decrypt </button>
-          <button onClick={() => {openInNewTab(nodes+"/api/transactions?senderIdOrRecipientId="+userAddress+"&limit=10&offset=0&sort=timestamp%3Adesc")}} className="decrypt">Your Last Transaction </button>
+          <button onClick={showLastUserTransaction} className="decrypt">Last transaction </button>
 
           <div className="PubKey">  
           <input
            id="field1"
            type="text"
-           placeholder="Paste here recipient adress to encode"
+           placeholder="Paste here recipient adress"
           />
           </div>
           
@@ -240,7 +324,7 @@ const Account = ({
           <input
            id="field2"
            type="text"
-           placeholder="Paste transaction id here to decode"
+           placeholder="Paste transaction id here or click last transaction to decode"
           />
           </div>
 
